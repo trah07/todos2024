@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo Detail</title>
+</head>
+<body>
+
+<h1><%= todo.title %></h1>
+
+<p>Stav: <%= todo.done ? 'Hotovo' : 'Nedokončeno' %></p>
+
+<a href="/toggle-todo/<%= todo.id %>">
+  <%= todo.done ? 'Označit jako nedokončeno' : 'Označit jako hotovo' %>
+</a>
+
+<form method="post" action="/remove-todo/<%= todo.id %>">
+  <button type="submit">Odstranit</button>
+</form>
+
+<form method="post" action="/edit-todo/<%= todo.id %>">
+  <input type="text" name="title" value="<%= todo.title %>">
+  <button type="submit">Upravit</button>
+</form>
+
+</body>
+</html>

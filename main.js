@@ -5,12 +5,12 @@ const app = express()
 let todos = [
   {
     id: 1,
-    title: 'Zajít na pivo',
+    title: 'Uvařit si na zítra',
     done: true,
   },
   {
     id: 2,
-    title: 'Vrátit se z hospody',
+    title: 'Udělat domácí úkoly',
     done: false,
   },
 ]
@@ -32,6 +32,19 @@ app.get('/', (req, res) => {
   })
 })
 
+
+app.get('/todo/:id', (req, res) => {
+  const todoId = parseInt(req.params.id)
+  const todo = todos.find(todo => todo.id === todoId)
+  if (!todo) {
+    res.status(404).send('Todo not found')
+    return
+  }
+  res.render('todoDetail', {
+    todo,
+  })
+})
+
 app.post('/add-todo', (req, res) => {
   const todo = {
     id: todos.length + 1,
@@ -44,11 +57,23 @@ app.post('/add-todo', (req, res) => {
   res.redirect('/')
 })
 
-app.get('/remove-todo/:id', (req, res) => {
+app.post('/edit-todo/:id', (req, res) => {
+  const todoId = parseInt(req.params.id)
+  const todo = todos.find(todo => todo.id === todoId)
+  if (!todo) {
+    res.status(404).send('Todo not found')
+    return
+  }
+  todo.title = req.body.title
+
+  res.redirect('/')
+})
+
+app.post('/remove-todo/:id', (req, res) => {
   todos = todos.filter((todo) => {
     return todo.id !== Number(req.params.id)
   })
-
+  console.log(todos)
   res.redirect('/')
 })
 

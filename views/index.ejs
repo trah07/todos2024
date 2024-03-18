@@ -12,24 +12,23 @@
 <ul>
 <% for (const todo of todos) { %>
   <li>
-     <%= todo.title %>
-     <a href="/remove-todo/<%= todo.id %>">
-        odebrat
-     </a>
-     <a href="/toggle-todo/<%= todo.id %>">
-       <%= todo.done ? 'hotovo' : 'nehotvo' %>
-     </a>
+    <a href="/todo/<%= todo.id %>"><%= todo.title %></a>
+    <a href="/remove-todo/<%= todo.id %>">
+      ODEBRAT
+    </a>
+    <a href="/toggle-todo/<%= todo.id %>">
+      <%= todo.done ? 'HOTOVO' : 'NEHOTOVO' %>
+    </a>
   </li>
 <% } %>
 </ul>
 
 <form method="post" action="/add-todo">
   <input
-    placeholder="Název todočka"
+    placeholder="Zadej název todo"
     name="title">
   <button type="submit">Přidat</button>
 </form>
-
 
 </body>
 </html>
