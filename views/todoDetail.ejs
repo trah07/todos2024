@@ -15,7 +15,7 @@
   <%= todo.done ? 'Označit jako nedokončeno' : 'Označit jako hotovo' %>
 </a>
 
-<form method="post" action="/remove-todo/<%= todo.id %>">
+<form method="get" action="/remove-todo/<%= todo.id %>">
   <button type="submit">Odstranit</button>
 </form>
 
