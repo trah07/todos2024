@@ -1,19 +1,9 @@
 import express from 'express'
+import knex from 'knex'
+import knexfile from './knexfile.js'
 
 const app = express()
-
-let todos = [
-  {
-    id: 1,
-    title: 'Zajít na pivo',
-    done: true,
-  },
-  {
-    id: 2,
-    title: 'Vrátit se z hospody',
-    done: false,
-  },
-]
+const db = knex(knexfile)
 
 app.set('view engine', 'ejs')
 
@@ -25,17 +15,17 @@ app.use((req, res, next) => {
   next()
 })
 
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
+  const todos = await db().select('*').from('todos')
+
   res.render('index', {
     title: 'Todos',
     todos,
   })
 })
 
-app.get('/todo/:id', (req, res, next) => {
-  const todo = todos.find((todo) => {
-    return todo.id === Number(req.params.id)
-  })
+app.get('/todo/:id', async (req, res, next) => {
+  const todo = await db('todos').select('*').where('id', req.params.id).first()
 
   if (!todo) return next()
 
@@ -44,46 +34,43 @@ app.get('/todo/:id', (req, res, next) => {
   })
 })
 
-app.post('/add-todo', (req, res) => {
+app.post('/add-todo', async (req, res) => {
   const todo = {
-    id: todos.length + 1,
     title: req.body.title,
     done: false,
   }
 
-  todos.push(todo)
+  await db('todos').insert(todo)
 
   res.redirect('/')
 })
 
-app.post('/update-todo/:id', (req, res, next) => {
-  const todo = todos.find((todo) => {
-    return todo.id === Number(req.params.id)
-  })
+app.post('/update-todo/:id', async (req, res, next) => {
+  const todo = await db('todos').select('*').where('id', req.params.id).first()
 
   if (!todo) return next()
 
-  todo.title = req.body.title
+  await db('todos').update({ title: req.body.title }).where('id', todo.id)
 
   res.redirect('back')
 })
 
-app.get('/remove-todo/:id', (req, res) => {
-  todos = todos.filter((todo) => {
-    return todo.id !== Number(req.params.id)
-  })
+app.get('/remove-todo/:id', async (req, res) => {
+  const todo = await db('todos').select('*').where('id', req.params.id).first()
+
+  if (!todo) return next()
+
+  await db('todos').delete().where('id', todo.id)
 
   res.redirect('/')
 })
 
-app.get('/toggle-todo/:id', (req, res, next) => {
-  const todo = todos.find((todo) => {
-    return todo.id === Number(req.params.id)
-  })
+app.get('/toggle-todo/:id', async (req, res, next) => {
+  const todo = await db('todos').select('*').where('id', req.params.id).first()
 
   if (!todo) return next()
 
-  todo.done = !todo.done
+  await db('todos').update({ done: !todo.done }).where('id', todo.id)
 
   res.redirect('back')
 })
