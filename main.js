@@ -32,6 +32,18 @@ app.get('/', (req, res) => {
   })
 })
 
+app.get('/todo/:id', (req, res, next) => {
+  const todo = todos.find((todo) => {
+    return todo.id === Number(req.params.id)
+  })
+
+  if (!todo) return next()
+
+  res.render('todo', {
+    todo,
+  })
+})
+
 app.post('/add-todo', (req, res) => {
   const todo = {
     id: todos.length + 1,
@@ -44,6 +56,18 @@ app.post('/add-todo', (req, res) => {
   res.redirect('/')
 })
 
+app.post('/update-todo/:id', (req, res, next) => {
+  const todo = todos.find((todo) => {
+    return todo.id === Number(req.params.id)
+  })
+
+  if (!todo) return next()
+
+  todo.title = req.body.title
+
+  res.redirect('back')
+})
+
 app.get('/remove-todo/:id', (req, res) => {
   todos = todos.filter((todo) => {
     return todo.id !== Number(req.params.id)
@@ -52,25 +76,27 @@ app.get('/remove-todo/:id', (req, res) => {
   res.redirect('/')
 })
 
-app.get('/toggle-todo/:id', (req, res) => {
+app.get('/toggle-todo/:id', (req, res, next) => {
   const todo = todos.find((todo) => {
     return todo.id === Number(req.params.id)
   })
 
+  if (!todo) return next()
+
   todo.done = !todo.done
 
-  res.redirect('/')
+  res.redirect('back')
 })
 
 app.use((req, res) => {
   res.status(404)
-  res.send('404 - Page not found')
+  res.send('404 - Stránka nenalezena')
 })
 
 app.use((err, req, res, next) => {
   console.error(err)
   res.status(500)
-  res.send('500 - Server error')
+  res.send('500 - Chyba na straně serveru')
 })
 
 app.listen(3000, () => {
