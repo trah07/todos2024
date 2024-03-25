@@ -1,17 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Todo Detail</title>
+  <style>
+    .form-container {
+      margin-bottom: 20px;
+    }
+
+    .done {
+      color: green;
+    }
+
+    .not-done {
+      color: red;
+    }
+
+    .link-done {
+      color: green;
+    }
+
+    .link-not-done {
+      color: red;
+    }
+  </style>
 </head>
+
 <body>
 
 <h1><%= todo.title %></h1>
 
-<p>Stav: <%= todo.done ? 'Hotovo' : 'Nedokončeno' %></p>
+<p>STAV: <span class="<%= todo.done ? 'done' : 'not-done' %>"><%= todo.done ? 'Hotovo' : 'Nedokončeno' %></span></p>
 
-<a href="/toggle-todo/<%= todo.id %>">
+<a href="/toggle-todo/<%= todo.id %>" class="<%= todo.done ? 'link-not-done' : 'link-done' %>">
   <%= todo.done ? 'Označit jako nedokončeno' : 'Označit jako hotovo' %>
 </a>
 
@@ -22,6 +45,19 @@
 <form method="post" action="/edit-todo/<%= todo.id %>">
   <input type="text" name="title" value="<%= todo.title %>">
   <button type="submit">Upravit</button>
+</form>
+
+<form method="post" action="/priority-todo/<%= todo.id %>" class="form-container">
+  <select name="priority">
+    <option value="normal" <% if (todo.priority === 'normal') { %>selected<% } %>>Normal</option>
+    <option value="low" <% if (todo.priority === 'low') { %>selected<% } %>>Low</option>
+    <option value="high" <% if (todo.priority === 'high') { %>selected<% } %>>High</option>
+  </select>
+  <button type="submit">Nastavit prioritu</button>
+</form>
+
+<form method="get" action="/" class="form-container">
+  <button type="submit">Zpět na seznam</button>
 </form>
 
 </body>

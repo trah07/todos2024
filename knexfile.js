@@ -4,5 +4,5 @@ export default {
         filename: './mydb.sqlite',
     },
     useNullAsDefault: false,
-    debig: true,
+    debug: true,
 }

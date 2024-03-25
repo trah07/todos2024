@@ -47,6 +47,16 @@ app.get('/todo/:id', async (req, res) => {
   })
 })
 
+
+app.post('/priority-todo/:id', async (req, res) => {
+  const { priority } = req.body
+  const todoId = req.params.id
+
+  await db('todos').update({ priority }).where('id', todoId)
+
+  res.redirect(`/todo/${todoId}`)
+})
+
 app.post('/add-todo', async (req, res) => {
   const todo = {
     title: req.body.title,
@@ -81,7 +91,7 @@ app.get('/toggle-todo/:id', async (req, res) => {
 
   if (!todo) return next()
 
-  await db('todos').update({ done: !todo.done }).where('id', id)
+  await db('todos').update({ done: !todo.done }).where('id', todo.id)
 
   res.redirect('back')
 })

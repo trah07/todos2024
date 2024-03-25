@@ -4,6 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %></title>
+  <style>
+    .priority {
+      color: grey;
+      font-size: 80%;
+    }
+    
+    .remove-link {
+      color: red;
+    }
+    
+    .done {
+      color: green;
+    }
+    
+    .not-done {
+      color: red;
+    }
+  </style>
 </head>
 <body>
 
@@ -13,10 +31,13 @@
 <% for (const todo of todos) { %>
   <li>
     <a href="/todo/<%= todo.id %>"><%= todo.title %></a>
+    <% if (todo.priority) { %>
+      <span class="priority">(<%= todo.priority %>)</span>
+    <% } %>
     <a href="/remove-todo/<%= todo.id %>">
       ODEBRAT
     </a>
-    <a href="/toggle-todo/<%= todo.id %>">
+    <a href="/toggle-todo/<%= todo.id %>" class="<%= todo.done ? 'done' : 'not-done' %>">
       <%= todo.done ? 'HOTOVO' : 'NEHOTOVO' %>
     </a>
   </li>
