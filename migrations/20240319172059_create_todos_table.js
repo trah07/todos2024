@@ -8,7 +8,6 @@ export const up = async (knex) => {
         table.increments('id').primary()
         table.string('title').notNullable()
         table.boolean('done').notNullable().defaultTo(false)
-        table.enum('priority', ['normal', 'low', 'high']).defaultTo('normal')
     })
 
 };
