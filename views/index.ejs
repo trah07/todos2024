@@ -21,8 +21,10 @@
       </a>
       &nbsp;
       <a href="/toggle-todo/<%= todo.id %>">
-        <%= todo.done ? 'hotovo' : 'nehotvo' %>
+        <%= todo.done ? 'hotovo' : 'nehotovo' %>
       </a>
+      &nbsp;
+      priorita <%= translatePriority(todo.priority) %>
     </li>
   <% } %>
   </ul>

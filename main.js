@@ -16,7 +16,7 @@ app.use((req, res, next) => {
 })
 
 app.get('/', async (req, res) => {
-  const todos = await db().select('*').from('todos')
+  const todos = await db('todos').select('*')
 
   res.render('index', {
     title: 'Todos',
@@ -50,7 +50,12 @@ app.post('/update-todo/:id', async (req, res, next) => {
 
   if (!todo) return next()
 
-  await db('todos').update({ title: req.body.title }).where('id', todo.id)
+  const query = db('todos').where('id', todo.id)
+
+  if (req.body.title) query.update({ title: req.body.title })
+  if (req.body.priority) query.update({ priority: req.body.priority })
+
+  await query
 
   res.redirect('back')
 })
@@ -85,6 +90,19 @@ app.use((err, req, res, next) => {
   res.status(500)
   res.send('500 - Chyba na straně serveru')
 })
+
+app.locals.translatePriority = (priority) => {
+  switch (priority) {
+    case 'low':
+      return 'nízká'
+    case 'normal':
+      return 'normální'
+    case 'high':
+      return 'vysoká'
+    default:
+      return 'neznámá'
+  }
+}
 
 app.listen(3000, () => {
   console.log('Server listening on http://localhost:3000')
