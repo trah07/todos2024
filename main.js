@@ -1,9 +1,8 @@
 import express from 'express'
-import knex from 'knex'
-import knexfile from './knexfile.js'
+import { db, getAllTodos, getTodoById } from './src/db.js'
+import { createWebSocketServer, sendTodoListToAllConnections } from './src/websockets.js'
 
 const app = express()
-const db = knex(knexfile)
 
 app.set('view engine', 'ejs')
 
@@ -16,7 +15,7 @@ app.use((req, res, next) => {
 })
 
 app.get('/', async (req, res) => {
-  const todos = await db('todos').select('*')
+  const todos = await getAllTodos()
 
   res.render('index', {
     title: 'Todos',
@@ -25,7 +24,7 @@ app.get('/', async (req, res) => {
 })
 
 app.get('/todo/:id', async (req, res, next) => {
-  const todo = await db('todos').select('*').where('id', req.params.id).first()
+  const todo = await getTodoById(req.params.id)
 
   if (!todo) return next()
 
@@ -46,7 +45,7 @@ app.post('/add-todo', async (req, res) => {
 })
 
 app.post('/update-todo/:id', async (req, res, next) => {
-  const todo = await db('todos').select('*').where('id', req.params.id).first()
+  const todo = await getTodoById(req.params.id)
 
   if (!todo) return next()
 
@@ -61,21 +60,25 @@ app.post('/update-todo/:id', async (req, res, next) => {
 })
 
 app.get('/remove-todo/:id', async (req, res) => {
-  const todo = await db('todos').select('*').where('id', req.params.id).first()
+  const todo = await getTodoById(req.params.id)
 
   if (!todo) return next()
 
   await db('todos').delete().where('id', todo.id)
 
+  sendTodoListToAllConnections()
+
   res.redirect('/')
 })
 
 app.get('/toggle-todo/:id', async (req, res, next) => {
-  const todo = await db('todos').select('*').where('id', req.params.id).first()
+  const todo = await getTodoById(req.params.id)
 
   if (!todo) return next()
 
   await db('todos').update({ done: !todo.done }).where('id', todo.id)
+
+  sendTodoListToAllConnections()
 
   res.redirect('back')
 })
@@ -104,6 +107,8 @@ app.locals.translatePriority = (priority) => {
   }
 }
 
-app.listen(3000, () => {
+const server = app.listen(3000, () => {
   console.log('Server listening on http://localhost:3000')
 })
+
+createWebSocketServer(server)
