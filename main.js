@@ -1,6 +1,6 @@
 import express from 'express';
 import { db, getAllTodos, getTodoById } from './src/db.js';
-import { createWebSocketServer, sendTodoListToAllConnections, sendUpdatedTodoDetail } from './src/websockets.js';
+import { createWebSocketServer, sendTodoListToAllConnections, sendUpdatedTodoDetail, sendTodoDetailToAllConnections } from './src/websockets.js';
 
 const app = express();
 

@@ -72,4 +72,7 @@ export const sendTodoDetailToAllConnections = async (todoId) => {
 
 export const sendUpdatedTodoDetail = async (todoId) => {
   await sendTodoDetailToAllConnections(todoId);
+  
+  await sendTodoListToAllConnections('update', todoId);
 };
+
