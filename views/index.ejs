@@ -25,31 +25,29 @@
 </head>
 <body>
 
-<h1><%= title %></h1>
+  <h1><%= title %></h1>
 
-<ul>
-<% for (const todo of todos) { %>
-  <li>
-    <a href="/todo/<%= todo.id %>"><%= todo.title %></a>
-    <% if (todo.priority) { %>
-      <span class="priority">(<%= todo.priority %>)</span>
-    <% } %>
-    <a href="/remove-todo/<%= todo.id %>">
-      ODEBRAT
-    </a>
-    <a href="/toggle-todo/<%= todo.id %>" class="<%= todo.done ? 'done' : 'not-done' %>">
-      <%= todo.done ? 'HOTOVO' : 'NEHOTOVO' %>
-    </a>
-  </li>
-<% } %>
-</ul>
+  <div id="todoList">
+    <%- include('_todos') %>
+  </div>
 
-<form method="post" action="/add-todo">
-  <input
-    placeholder="Zadej název todo"
-    name="title">
-  <button type="submit">Přidat</button>
-</form>
+  <form method="post" action="/add-todo">
+    <input placeholder="Název todočka" name="title">
+    <button type="submit">Přidat</button>
+  </form>
+
+  <script>
+    const ws = new WebSocket('ws://localhost:3000')
+
+    ws.addEventListener('message', (ev) => {
+      const data = JSON.parse(ev.data)
+
+      if (data.type === 'todoList') {
+        const el = document.getElementById('todoList')
+        el.innerHTML = data.html
+      }
+    })
+  </script>
 
 </body>
 </html>

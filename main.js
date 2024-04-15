@@ -1,23 +1,8 @@
 import express from 'express'
-import knex from 'knex'
-import knexfile from './knexfile.js'
+import { db, getAllTodos, getTodoById } from './src/db.js'
+import { createWebSocketServer, sendTodoListToAllConnections } from './src/websockets.js'
 
 const app = express()
-const db = knex(knexfile)
-
-/** let todos = [
-  {
-    id: 1,
-    title: 'Uvařit si na zítra',
-    done: true,
-  },
-  {
-    id: 2,
-    title: 'Udělat domácí úkoly',
-    done: false,
-  },
-]
-**/
 
 app.set('view engine', 'ejs')
 
@@ -30,7 +15,7 @@ app.use((req, res, next) => {
 })
 
 app.get('/', async (req, res) => {
-  const todos = await db().select('*').from('todos')
+  const todos = await getAllTodos()
 
   res.render('index', {
     title: 'Todos',
@@ -38,23 +23,14 @@ app.get('/', async (req, res) => {
   })
 })
 
+app.get('/todo/:id', async (req, res, next) => {
+  const todo = await getTodoById(req.params.id)
 
-app.get('/todo/:id', async (req, res) => {
-  const todo = await db('todos').select('*').where('id', req.params.id).first()
   if (!todo) return next()
-  res.render('todoDetail', {
+
+  res.render('todo', {
     todo,
   })
-})
-
-
-app.post('/priority-todo/:id', async (req, res) => {
-  const { priority } = req.body
-  const todoId = req.params.id
-
-  await db('todos').update({ priority }).where('id', todoId)
-
-  res.redirect(`/todo/${todoId}`)
 })
 
 app.post('/add-todo', async (req, res) => {
@@ -68,45 +44,71 @@ app.post('/add-todo', async (req, res) => {
   res.redirect('/')
 })
 
-app.post('/edit-todo/:id', async (req, res) => {
-  const todo = await db('todos').select('*').where('id', req.params.id).first()
+app.post('/update-todo/:id', async (req, res, next) => {
+  const todo = await getTodoById(req.params.id)
+
   if (!todo) return next()
 
-  await db('todos').update({ title: req.body.title }).where('id', todo.id)
+  const query = db('todos').where('id', todo.id)
+
+  if (req.body.title) query.update({ title: req.body.title })
+  if (req.body.priority) query.update({ priority: req.body.priority })
+
+  await query
 
   res.redirect('back')
 })
 
 app.get('/remove-todo/:id', async (req, res) => {
-  const todo = await db('todos').select('*').where('id', req.params.id).first()
+  const todo = await getTodoById(req.params.id)
+
   if (!todo) return next()
 
   await db('todos').delete().where('id', todo.id)
 
+  sendTodoListToAllConnections()
+
   res.redirect('/')
 })
 
-app.get('/toggle-todo/:id', async (req, res) => {
-  const todo = await db('todos').select('*').where('id', req.params.id).first()
+app.get('/toggle-todo/:id', async (req, res, next) => {
+  const todo = await getTodoById(req.params.id)
 
   if (!todo) return next()
 
   await db('todos').update({ done: !todo.done }).where('id', todo.id)
+
+  sendTodoListToAllConnections()
 
   res.redirect('back')
 })
 
 app.use((req, res) => {
   res.status(404)
-  res.send('404 - Page not found')
+  res.send('404 - Stránka nenalezena')
 })
 
 app.use((err, req, res, next) => {
   console.error(err)
   res.status(500)
-  res.send('500 - Server error')
+  res.send('500 - Chyba na straně serveru')
 })
 
-app.listen(3000, () => {
+app.locals.translatePriority = (priority) => {
+  switch (priority) {
+    case 'low':
+      return 'nízká'
+    case 'normal':
+      return 'normální'
+    case 'high':
+      return 'vysoká'
+    default:
+      return 'neznámá'
+  }
+}
+
+const server = app.listen(3000, () => {
   console.log('Server listening on http://localhost:3000')
 })
+
+createWebSocketServer(server)
