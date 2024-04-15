@@ -4,24 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %></title>
-  <style>
-    .priority {
-      color: grey;
-      font-size: 80%;
-    }
-    
-    .remove-link {
-      color: red;
-    }
-    
-    .done {
-      color: green;
-    }
-    
-    .not-done {
-      color: red;
-    }
-  </style>
 </head>
 <body>
 
@@ -37,16 +19,26 @@
   </form>
 
   <script>
-    const ws = new WebSocket('ws://localhost:3000')
+    const ws = new WebSocket('ws://localhost:3000');
+    const locationTodoId = window.location.pathname.split('/').pop();
+
+    const handleMessage = (data) => {
+      if (data.type === 'todoList') {
+        const el = document.getElementById('todoList');
+        el.innerHTML = data.html;
+      }
+    };
 
     ws.addEventListener('message', (ev) => {
-      const data = JSON.parse(ev.data)
+      const data = JSON.parse(ev.data);
+      console.log(data);
+      handleMessage(data);
+    });
 
-      if (data.type === 'todoList') {
-        const el = document.getElementById('todoList')
-        el.innerHTML = data.html
-      }
-    })
+    // Funkce pro získání detailu todočka přes websockety
+    const getTodoDetail = (todoId) => {
+      ws.send(JSON.stringify({ type: 'getTodoDetail', todoId }));
+    };
   </script>
 
 </body>

@@ -16,7 +16,7 @@
   </a>
   &nbsp;
   <a href="/toggle-todo/<%= todo.id %>">
-    <%= todo.done ? 'hotovo' : 'nehotvo' %>
+    <%= todo.done ? 'hotovo' : 'nehotovo' %>
   </a>
 
   <hr>
@@ -27,9 +27,9 @@
     <input placeholder="Název todočka" name="title" value="<%= todo.title %>">
     <label>Priorita</label>
     <select name="priority">
-      <option value="low" <%= todo.priority === 'low' ? 'selected' : '' %>><%= translatePriority('low') %></option>
-      <option value="normal" <%= todo.priority === 'normal' ? 'selected' : '' %>><%= translatePriority('normal') %></option>
-      <option value="high" <%= todo.priority === 'high' ? 'selected' : '' %>><%= translatePriority('high') %></option>
+      <option value="low" <%= todo.priority === 'low' ? 'selected' : '' %>>low</option>
+      <option value="normal" <%= todo.priority === 'normal' ? 'selected' : '' %>>normal</option>
+      <option value="high" <%= todo.priority === 'high' ? 'selected' : '' %>>high</option>
     </select>
     <button type="submit">Upravit</button>
   </form>
@@ -37,6 +37,30 @@
   <hr>
 
   <a href="/">Zpět na seznam</a>
+
+  <script>
+    const ws = new WebSocket('ws://localhost:3000');
+    const locationTodoId = window.location.pathname.split('/').pop();
+
+    const handleMessage = (data) => {
+      const el = document.getElementsByTagName("html")[0]
+      if (data.type === 'todoList') {
+        if (data.operation == 'delete') {
+          el.innerHTML = '<h1>NENALEZENO</h1>';
+        } else el.innerHTML = data.detailHtml;
+      }
+      else if (data.type === 'todoDetail') {
+        el.innerHTML = data.detailHtml;
+      }
+    };
+
+    ws.addEventListener('message', (ev) => {
+      const data = JSON.parse(ev.data);
+      console.log(data);
+      handleMessage(data);
+    });
+
+  </script>
 
 </body>
 </html>
