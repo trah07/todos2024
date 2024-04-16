@@ -43,6 +43,8 @@
     const locationTodoId = window.location.pathname.split('/').pop();
 
     const handleMessage = (data) => {
+      if (locationTodoId != data.todoId) return;
+      
       const el = document.getElementsByTagName("html")[0]
       if (data.type === 'todoList') {
         if (data.operation == 'delete') {
